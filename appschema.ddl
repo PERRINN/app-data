@@ -40,6 +40,21 @@ CREATE TABLE perrapp.message
 	msg_body		BLOB
 );
 
+CREATE TABLE perrapp.org
+(
+	id				INTEGER PRIMARY KEY AUTO_INCREMENT ,
+	org_name		VARCHAR(255) NOT NULL,
+	org_descr		BLOB,
+	org_owner		INTEGER NOT NULL
+);
+
+CREATE TABLE perrapp.org_team
+(
+	id				INTEGER PRIMARY KEY AUTO_INCREMENT ,
+	org 			INTEGER NOT NULL,
+	team 			INTEGER	NOT NULL
+);
+
 CREATE TABLE perrapp.project
 (
 	id				INTEGER PRIMARY KEY AUTO_INCREMENT ,
@@ -54,11 +69,11 @@ CREATE TABLE perrapp.project_member
 	member 			INTEGER NOT NULL
 );
 
-CREATE TABLE perrapp.project_team
+CREATE TABLE perrapp.project_org
 (
 	id				INTEGER PRIMARY KEY AUTO_INCREMENT ,
 	project 		INTEGER NOT NULL ,
-	team 			INTEGER NOT NULL
+	org 			INTEGER NOT NULL
 );
 
 
@@ -66,7 +81,8 @@ CREATE TABLE perrapp.region
 (
 	id				INTEGER PRIMARY KEY AUTO_INCREMENT ,
 	country 		INTEGER NOT NULL ,
-	region_name		VARCHAR(255) NOT NULL
+	region_name		VARCHAR(255) NOT NULL,
+	region_code		CHAR(5)
 );
 
 CREATE TABLE perrapp.task
@@ -152,6 +168,10 @@ ALTER TABLE perrapp.project_member ADD CONSTRAINT fk_project_member_001 FOREIGN 
 
 ALTER TABLE perrapp.project_member ADD CONSTRAINT fk_project_member_002 FOREIGN KEY ( member ) REFERENCES perrapp.member( id );
 
+ALTER TABLE perrapp.project_org ADD CONSTRAINT fk_project_org_001 FOREIGN KEY ( project ) REFERENCES perrapp.project( id );
+
+ALTER TABLE perrapp.project_org ADD CONSTRAINT fk_project_org_002 FOREIGN KEY ( org ) REFERENCES perrapp.org( id );
+
 ALTER TABLE perrapp.task ADD CONSTRAINT fk_task_001 FOREIGN KEY ( project ) REFERENCES perrapp.project( id );
 
 ALTER TABLE perrapp.task ADD CONSTRAINT fk_task_002 FOREIGN KEY ( task_owner ) REFERENCES perrapp.member( id );
@@ -166,3 +186,6 @@ ALTER TABLE perrapp.team_member ADD CONSTRAINT fk_team_member_001 FOREIGN KEY ( 
 
 ALTER TABLE perrapp.team_member ADD CONSTRAINT fk_team_member_002 FOREIGN KEY ( member ) REFERENCES perrapp.member( id );
 
+ALTER TABLE perrapp.team_org_team ADD CONSTRAINT fk_org_team_001 FOREIGN KEY ( org ) REFERENCES perrapp.org( id );
+
+ALTER TABLE perrapp.team_org_team ADD CONSTRAINT fk_org_team_002 FOREIGN KEY ( team ) REFERENCES perrapp.team( id );
