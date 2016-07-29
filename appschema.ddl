@@ -27,7 +27,11 @@ CREATE TABLE perrapp.location
 
 CREATE TABLE perrapp.member
 (
-	id				INTEGER PRIMARY KEY AUTO_INCREMENT
+	id				INTEGER PRIMARY KEY AUTO_INCREMENT ,
+	user_name		VARCHAR(255) NOT NULL ,
+	password		VARCHAR(255) ,
+	create_date		DATETIME ,
+	pw_change		DATETIME
 );
 
 CREATE TABLE perrapp.message
@@ -53,6 +57,18 @@ CREATE TABLE perrapp.org_team
 	id				INTEGER PRIMARY KEY AUTO_INCREMENT ,
 	org 			INTEGER NOT NULL,
 	team 			INTEGER	NOT NULL
+);
+
+CREATE TABLE perrapp.profile
+(
+	id 				INTEGER PRIMARY KEY AUTO_INCREMENT ,
+	user 			INTEGER NOT NULL ,
+	country 		INTEGER NOT NULL ,
+	region 			INTEGER ,
+	city 			INTEGER ,
+	dob				DATE ,
+	description		BLOB ,
+	photo			VARCHAR(255)
 );
 
 CREATE TABLE perrapp.project
@@ -139,6 +155,11 @@ CREATE INDEX perrapp.ix_location_001 ON perrapp.location
 	location_name ASC
 );
 
+CREATE INDEX perrapp.ix_member_001 ON perrapp.member
+(
+	user_name ASC
+);
+
 CREATE INDEX perrapp.ix_project_001 ON perrapp.project
 (
 	project_name ASC
@@ -161,6 +182,14 @@ ALTER TABLE perrapp.city ADD CONSTRAINT fk_city_002 FOREIGN KEY ( region ) REFER
 ALTER TABLE perrapp.message ADD CONSTRAINT fk_message_001 FOREIGN KEY ( sender ) REFERENCES perrapp.member( id );
 
 ALTER TABLE perrapp.message ADD CONSTRAINT fk_message_001 FOREIGN KEY ( receiver ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.profile ADD CONSTRAINT fk_profile_001 FOREIGN KEY ( user ) REFERENCES perrapp.user( id );
+
+ALTER TABLE perrapp.profile ADD CONSTRAINT fk_profile_002 FOREIGN KEY ( country ) REFERENCES perrapp.country( id );
+
+ALTER TABLE perrapp.profile ADD CONSTRAINT fk_profile_003 FOREIGN KEY ( region ) REFERENCES perrapp.region( id );
+
+ALTER TABLE perrapp.profile ADD CONSTRAINT fk_profile_004 FOREIGN KEY ( city ) REFERENCES perrapp.city( id );
 
 ALTER TABLE perrapp.project ADD CONSTRAINT fk_project_001 FOREIGN KEY ( project_owner ) REFERENCES perrapp.member( id );
 
