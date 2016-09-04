@@ -1,4 +1,4 @@
--- Copyright 2016 Christopher F. Moran on behalf of PERRINN Limited.
+-- Copyright 2016 PERRINN Limited.
 --
 -- Please refer to the file LICENSE in this repository
 
@@ -63,8 +63,6 @@ CREATE TABLE perrapp.devicetype
 	change_date		DATETIME ,
 	change_id		INTEGER ,
 	active			BOOLEAN NOT NULL ,
-	evt_start		DATETIME NOT NULL,
-	evt_end			DATETIME NOT NULL,
 	description		VARCHAR(255)
 );
 
@@ -76,7 +74,10 @@ CREATE TABLE perrapp.event
 	change_date		DATETIME ,
 	change_id		INTEGER ,
 	active			BOOLEAN NOT NULL ,
-	description		VARCHAR(255) NOT NULL
+	evt_start		DATETIME NOT NULL,
+	evt_end			DATETIME NOT NULL,
+	description		VARCHAR(255) NOT NULL ,
+	team_id			INTEGER NOT NULL ,
 );
 
 CREATE TABLE perrapp.image
@@ -133,6 +134,7 @@ CREATE TABLE perrapp.member
 	change_date		DATETIME ,
 	change_id		INTEGER ,
 	active			BOOLEAN NOT NULL ,
+	email			VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE perrapp.message
@@ -147,7 +149,8 @@ CREATE TABLE perrapp.message
 	receiver 		INTEGER NOT NULL ,
 	send_stamp		DATETIME NOT NULL ,
 	received		SMALLINT NOT NULL ,
-	msg_body		BLOB
+	subject			VARCHAR(255) ,
+	msg_body		TEXT
 );
 
 CREATE TABLE perrapp.profile
@@ -171,6 +174,8 @@ CREATE TABLE perrapp.profile
 	curr_lat		DOUBLE ,
 	curr_tz			INTEGER
 	curr_long		DOUBLE ,
+	display_name	VARCHAR(255) ,
+	date_of_birth	DATE 
 );
 
 CREATE TABLE perrapp.project
@@ -183,6 +188,7 @@ CREATE TABLE perrapp.project
 	active			BOOLEAN NOT NULL ,
 	project_name	VARCHAR(255) NOT NULL ,
 	project_owner	INTEGER NOT NULL
+	project_team	INTEGER
 );
 
 CREATE TABLE perrapp.project_member
@@ -313,6 +319,11 @@ CREATE INDEX perrapp.ix_location_001 ON perrapp.location
 	location_name ASC
 );
 
+CREATE INDEX perrapp.ix_member_001 ON perrap.member_id
+(
+	email ASC
+);
+
 CREATE INDEX perrapp.ix_project_001 ON perrapp.project
 (
 	project_name ASC
@@ -328,19 +339,97 @@ CREATE INDEX perrapp.ix_team_001 ON perrapp.team
 	team_name ASC
 );
 
+ALTER TABLE perrapp.activity ADD CONSTRAINT fk_activity_001 FOREIGN KEY ( author_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.activity ADD CONSTRAINT fk_activity_002 FOREIGN KEY ( team_id ) REFERENCES perrapp.team( id );
+
+ALTER TABLE perrapp.activity ADD CONSTRAINT fk_activity_003 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.activity ADD CONSTRAINT fk_activity_004 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
 ALTER TABLE perrapp.city ADD CONSTRAINT fk_city_001 FOREIGN KEY ( country ) REFERENCES perrapp.country( id );
 
 ALTER TABLE perrapp.city ADD CONSTRAINT fk_city_002 FOREIGN KEY ( region ) REFERENCES perrapp.region( id );
 
-ALTER TABLE perrapp.message ADD CONSTRAINT fk_message_001 FOREIGN KEY ( sender ) REFERENCES perrapp.member( id );
+ALTER TABLE perrapp.city ADD CONSTRAINT fk_city_003 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
 
-ALTER TABLE perrapp.message ADD CONSTRAINT fk_message_001 FOREIGN KEY ( receiver ) REFERENCES perrapp.member( id );
+ALTER TABLE perrapp.city ADD CONSTRAINT fk_city_004 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
 
-ALTER TABLE perrapp.project ADD CONSTRAINT fk_project_001 FOREIGN KEY ( project_owner ) REFERENCES perrapp.member( id );
+ALTER TABLE perrapp.country ADD CONSTRAINT fk_country_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
 
-ALTER TABLE perrapp.project_member ADD CONSTRAINT fk_project_member_001 FOREIGN KEY ( project ) REFERENCES perrapp.project( id );
+ALTER TABLE perrapp.country ADD CONSTRAINT fk_country_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
 
-ALTER TABLE perrapp.project_member ADD CONSTRAINT fk_project_member_002 FOREIGN KEY ( member ) REFERENCES perrapp.member( id );
+ALTER TABLE perrapp.devicetype ADD CONSTRAINT fk_devicetype_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.devicetype ADD CONSTRAINT fk_devicetype_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.event ADD CONSTRAINT fk_event_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.event ADD CONSTRAINT fk_event_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.event ADD CONSTRAINT fk_event_003 FOREIGN KEY ( team_id ) REFERENCES perrapp.team( id );
+
+ALTER TABLE perrapp.image ADD CONSTRAINT fk_image_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.image ADD CONSTRAINT fk_image_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.image ADD CONSTRAINT fk_image_003 FOREIGN KEY ( member_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.image ADD CONSTRAINT fk_image_004 FOREIGN KEY ( team_id ) REFERENCES perrapp.team( id );
+
+ALTER TABLE perrapp.key ADD CONSTRAINT fk_key_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.key ADD CONSTRAINT fk_key_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.key ADD CONSTRAINT fk_key_003 FOREIGN KEY ( member_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.key ADD CONSTRAINT fk_key_004 FOREIGN KEY ( device_type ) REFERENCES perrapp.devicetype( id );
+
+ALTER TABLE perrapp.location ADD CONSTRAINT fk_location_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.location ADD CONSTRAINT fk_location_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.message ADD CONSTRAINT fk_message_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.message ADD CONSTRAINT fk_message_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.message ADD CONSTRAINT fk_message_003 FOREIGN KEY ( sender ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.message ADD CONSTRAINT fk_message_004 FOREIGN KEY ( receiver ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.profile ADD CONSTRAINT fk_profile_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.profile ADD CONSTRAINT fk_profile_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.profile ADD CONSTRAINT fk_profile_003 FOREIGN KEY ( member_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.profile ADD CONSTRAINT fk_profile_004 FOREIGN KEY ( home_tz ) REFERENCES perrapp.timezone( id );
+
+ALTER TABLE perrapp.profile ADD CONSTRAINT fk_profile_005 FOREIGN KEY ( curr_tz ) REFERENCES perrapp.timezone( id );
+
+ALTER TABLE perrapp.project ADD CONSTRAINT fk_project_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.project ADD CONSTRAINT fk_project_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.project ADD CONSTRAINT fk_project_003 FOREIGN KEY ( project_owner ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.project ADD CONSTRAINT fk_project_004 FOREIGN KEY ( project_team ) REFERENCES perrapp.team( id );
+
+ALTER TABLE perrapp.project_member ADD CONSTRAINT fk_project_member_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.project_member ADD CONSTRAINT fk_project_member_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.project_member ADD CONSTRAINT fk_project_member_003 FOREIGN KEY ( project ) REFERENCES perrapp.project( id );
+
+ALTER TABLE perrapp.project_member ADD CONSTRAINT fk_project_member_004 FOREIGN KEY ( member ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.project_team ADD CONSTRAINT fk_project_team_001 FOREIGN KEY ( create_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.project_team ADD CONSTRAINT fk_project_team_002 FOREIGN KEY ( change_id ) REFERENCES perrapp.member( id );
+
+ALTER TABLE perrapp.project_team ADD CONSTRAINT fk_project_team_003 FOREIGN KEY ( project ) REFERENCES perrapp.project( id );
+
+ALTER TABLE perrapp.project_team ADD CONSTRAINT fk_project_team_004 FOREIGN KEY ( team ) REFERENCES perrapp.team( id );
 
 ALTER TABLE perrapp.task ADD CONSTRAINT fk_task_001 FOREIGN KEY ( project ) REFERENCES perrapp.project( id );
 
@@ -356,3 +445,6 @@ ALTER TABLE perrapp.team_member ADD CONSTRAINT fk_team_member_001 FOREIGN KEY ( 
 
 ALTER TABLE perrapp.team_member ADD CONSTRAINT fk_team_member_002 FOREIGN KEY ( member ) REFERENCES perrapp.member( id );
 
+ALTER TABLE perrapp.timezone ADD CONSTRAINT fk_timezone_001 FOREIGN KEY ( team ) REFERENCES perrapp.team( id );
+
+ALTER TABLE perrapp.timezone ADD CONSTRAINT fk_timezone_002 FOREIGN KEY ( member ) REFERENCES perrapp.member( id );
